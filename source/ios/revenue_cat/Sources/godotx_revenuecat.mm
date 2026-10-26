@@ -17,6 +17,24 @@ static Dictionary godotx_customer_info_dict(RCCustomerInfo *info) {
         }
     }
     d["active_ids"] = ids;
+    // Every consumable, non-consumable and non-renewing purchase, with the store's own transaction id
+    // (the one purchase_result reports) and its purchase date in unix seconds.
+    Array transactions;
+    if (info) {
+        for (RCNonSubscriptionTransaction *tx in info.nonSubscriptions) {
+            Dictionary t;
+            t["product_id"] = String::utf8(tx.productIdentifier.UTF8String);
+            t["transaction_id"] = String::utf8(tx.storeTransactionIdentifier.UTF8String);
+            t["purchase_date"] = (int64_t)tx.purchaseDate.timeIntervalSince1970;
+            transactions.append(t);
+        }
+    }
+    d["transactions"] = transactions;
+    // RevenueCat's server time for this record, in unix seconds (0 without a record).
+    d["request_date"] = info ? (int64_t)info.requestDate.timeIntervalSince1970 : (int64_t)0;
+    // The App Store storefront, ISO 3166-1 alpha-3 ("" until StoreKit reports it).
+    NSString *storefront = RCPurchases.isConfigured ? [RCPurchases sharedPurchases].storeFrontCountryCode : nil;
+    d["storefront"] = storefront ? String::utf8(storefront.UTF8String) : String();
     return d;
 }
 

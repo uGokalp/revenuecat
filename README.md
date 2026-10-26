@@ -8,6 +8,12 @@
 
 Native RevenueCat integration for Godot Engine with full support for iOS and Android.
 
+> **Fork of [godot-x/revenuecat](https://github.com/godot-x/revenuecat) 2.6.0.** On iOS, the customer info
+> dictionaries also carry the player's non-subscription purchase history (`transactions`), RevenueCat's server
+> time (`request_date`) and the storefront (`storefront`), so a game can deliver a purchase that completed after
+> its sheet closed (Ask to Buy, an app killed mid-purchase) and restore products that have no entitlement.
+> Releases are tagged `2.6.0-ks.N`.
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -293,6 +299,9 @@ func _on_customer_info_changed(data: Dictionary):
 |-----|------|-------|
 | `active_entitlements` | `int` | Count of active entitlements, `0` if there are none |
 | `active_ids` | `PackedStringArray` | The active entitlements' identifiers, `[]` if there are none |
+| `transactions` | `Array[Dictionary]` | iOS only (this fork): every non-subscription purchase (consumable, non-consumable, non-renewing), each `{product_id: String, transaction_id: String, purchase_date: int}`. `transaction_id` is the store's id, the same one `purchase_result` reports; `purchase_date` is unix seconds |
+| `request_date` | `int` | iOS only (this fork): RevenueCat's server time for this record, unix seconds (`0` without a record) |
+| `storefront` | `String` | iOS only (this fork): the App Store storefront, ISO 3166-1 alpha-3 (`""` until StoreKit reports it) |
 
 Use `active_ids` to gate on a specific entitlement, and `active_entitlements` only when a count is all you need. When a `get_customer_info()` fetch fails, `customer_info` carries an `error` key with the SDK's own message.
 
